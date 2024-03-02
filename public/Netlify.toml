@@ -1,23 +1,47 @@
 [[headers]]
-  for = "/Build/*.data.br"
+  for = "/Host/Build/*.data.br"
   [headers.values]
     Content-Encoding = "br"
     Content-Type = "application/octet-stream"
 	
 [[headers]]
-  for = "/Build/*.wasm.br"
+  for = "/Host/Build/*.wasm.br"
   [headers.values]
     Content-Encoding = "br"
     Content-Type = "application/wasm"
 
 [[headers]]                                                                      
-  for = "/Build/*.js"                                                             
+  for = "/Host/Build/*.js"                                                             
   [headers.values]
     Content-Encoding = "js"
     Content-Type = "application/javascript"
 	
 [[headers]]                                                                      
-  for = "/Build/*.js.br"                                                             
+  for = "/Host/Build/*.js.br"                                                             
+  [headers.values]
+    Content-Encoding = "br"
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "/Player/Build/*.data.br"
+  [headers.values]
+    Content-Encoding = "br"
+    Content-Type = "application/octet-stream"
+	
+[[headers]]
+  for = "/Player/Build/*.wasm.br"
+  [headers.values]
+    Content-Encoding = "br"
+    Content-Type = "application/wasm"
+
+[[headers]]                                                                      
+  for = "/Player/Build/*.js"                                                             
+  [headers.values]
+    Content-Encoding = "js"
+    Content-Type = "application/javascript"
+	
+[[headers]]                                                                      
+  for = "/Player/Build/*.js.br"                                                             
   [headers.values]
     Content-Encoding = "br"
     Content-Type = "application/javascript"
