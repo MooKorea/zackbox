@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    background-color: rgb(57, 55, 59);
+    color: white;
+    font-family: Nunito;
+}
+
+h1 {
+    font-family: Madimi One;
+    font-size:4rem;
+    letter-spacing: -0.15rem;
+}
+
+input {
+    outline: none;
+    color: black;
+}
