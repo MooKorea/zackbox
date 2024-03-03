@@ -15,11 +15,14 @@ export default function FaceDetection() {
     bl: faceapi.Point,
     br: faceapi.Point
   ) {
-    const midX = width * 0.5;
-    const midY = height * 0.5;
-    const tlCheck = tl.x < midX && tl.y < midY;
-    const trCheck = tr.x > midX;
-    const blCheck = bl.y > midY;
+    setIsAreaFit(tr.x / width - tl.x / width > 0.4)
+    const midX = (width * 0.5) / width;
+    const midY = (height * 0.5) / height;
+    
+    const gapRadius = 0.1
+    const tlCheck = tl.x / width < midX - gapRadius && tl.y / height < midY - gapRadius;
+    const trCheck = tr.x / width > midX + gapRadius;
+    const blCheck = bl.y / height > midY + gapRadius;
     setIsInFrame(tlCheck && trCheck && blCheck);
   }
 
@@ -39,7 +42,6 @@ export default function FaceDetection() {
         const displaySize = { width: video.clientWidth, height: video.clientHeight };
         faceapi.matchDimensions(canvas, displaySize);
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
-        setIsAreaFit(resizedDetections.box.area > 20000);
         handleFaceInRange(
           video.clientWidth,
           video.clientHeight,
@@ -63,7 +65,6 @@ export default function FaceDetection() {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       video.srcObject = stream;
       video.addEventListener("loadedmetadata", async () => {
-        console.log("video playing");
         video.play();
         await faceapi.nets.tinyFaceDetector.loadFromUri("./Face_Track");
         handleFaceTrack();
@@ -76,7 +77,7 @@ export default function FaceDetection() {
       <div>{isInFrame ? "face centered" : "face not centered"}</div>
       <div>{isAreaFit ? "face big enough" : "face not big enough"}</div>
 
-      <div className="relative w-screen">
+      <div className="relative w-screen px-12">
         <video ref={videoRef} style={{ transform: "rotateY(180deg)" }}></video>
         <canvas
           ref={canvasRef}
