@@ -11,7 +11,8 @@ export default {
         "madimi": ["Madimi One", "sans-serif"]
       },
       colors: {
-        "primary": "#5345f5"
+        "primary": "var(--primary)",
+        "background": "var(--background)"
       }
     },
   },

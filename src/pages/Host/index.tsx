@@ -1,4 +1,5 @@
 import QRCodeStyling from "qr-code-styling-2";
+import { useEffect } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 
 function makeid(length: number) {
@@ -14,7 +15,7 @@ function makeid(length: number) {
 }
 
 export default function Host() {
-  const { unityProvider, sendMessage } = useUnityContext({
+  const { unityProvider, sendMessage, isLoaded } = useUnityContext({
     loaderUrl: "./Host/Build/Host.loader.js",
     dataUrl: "./Host/Build/Host.data.br",
     frameworkUrl: "./Host/Build/Host.framework.js.br",
@@ -22,7 +23,7 @@ export default function Host() {
   });
 
   const HandleQRCode = () => {
-    const code = makeid(4)
+    const code = makeid(4);
     const url = `${window.location.origin}?code=${code}`;
     console.log(url);
     const qrCode = new QRCodeStyling({
@@ -55,9 +56,15 @@ export default function Host() {
     })();
   };
 
+  useEffect(() => {
+    if (!isLoaded) return;
+    window.CreateGameQRCode = function () {
+      HandleQRCode();
+    };
+  }, [isLoaded]);
+
   return (
     <div>
-      <button onClick={() => HandleQRCode()}>Create QR Code</button>
       <Unity unityProvider={unityProvider} style={{ width: "960px", height: "600px" }} />
     </div>
   );

@@ -1,12 +1,6 @@
 import { useEffect } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 
-declare global {
-  interface Window {
-    WebFunction: any;
-  }
-}
-
 interface UnityPlayer {
   setIsCanvas: React.Dispatch<React.SetStateAction<boolean>>;
 }
