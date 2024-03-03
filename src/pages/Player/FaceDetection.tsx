@@ -23,14 +23,17 @@ export default function FaceDetection() {
           className="absolute top-0"
           style={{ transform: "rotateY(180deg)" }}
         ></canvas>
-        <div className="absolute top-[50%] -translate-y-1/2 w-[15rem] h-[19rem] bg-[#c4c4c4] rounded-full mix-blend-color-dodge"></div>
+        <div
+          className="absolute top-[50%] -translate-y-1/2 bg-[#c4c4c4] rounded-full mix-blend-color-dodge"
+          style={{ width: dimensions.x / 3 * 1.25, height: dimensions.x / 3 * 1.7 }}
+        ></div>
         <div
           className="h-full absolute flex justify-center"
-          style={{ width: dimensions.x }}
-        >
-        </div>
+          style={{ width: dimensions.x / 3 }}
+        ></div>
         <FaceGraphic
           className="absolute top-[50%] -translate-y-1/2 scale-[1.3]"
+          width={dimensions.x / 3}
           isValid={isAreaFit && isInFrame}
         />
       </div>

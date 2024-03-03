@@ -7,19 +7,10 @@ export default function FaceGraphic({ isValid, ...props }: FaceGraphic) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="185.91"
-      height="242.53"
       viewBox="0 0 185.91 242.53"
       {...props}
     >
       <g>
-        {/* <mask id="faceClip">
-          <path
-            fill="white"
-            strokeWidth="0"
-            d="M185.91 92.96c0 1.3-.02 59.22-.09 60.52-2.03 49.53-42.83 89.06-92.87 89.06S2.12 203 .09 153.47C.03 152.17 0 94.26 0 92.95 0 41.62 41.62 0 92.96 0s92.96 41.62 92.96 92.96z"
-          ></path>
-        </mask> */}
         <path
           fill={fill}
           strokeWidth="0"
