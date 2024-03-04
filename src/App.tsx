@@ -6,7 +6,7 @@ declare global {
   interface Window {
     WebFunction: any;
     CreateGameQRCode: any;
-    CancelFaceTrack: boolean;
+    FaceTrack: boolean;
   }
 }
 
