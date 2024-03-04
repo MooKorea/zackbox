@@ -5,6 +5,7 @@ export default function useFaceDetection(
     videoRef: React.MutableRefObject<HTMLVideoElement>,
     canvasRef: React.MutableRefObject<HTMLCanvasElement>
   ) {
+    const [isFaceDetected, setIsFaceDetected] = useState(false);
     const [isInFrame, setIsInFrame] = useState(false);
     const [isAreaFit, setIsAreaFit] = useState(false);
     type Dimensions = { x: number; y: number };
@@ -42,6 +43,7 @@ export default function useFaceDetection(
         );
   
         if (detections !== undefined) {
+          setIsFaceDetected(true)
           const displaySize = { width: video.clientWidth, height: video.clientHeight };
           faceapi.matchDimensions(canvas, displaySize);
           const resizedDetections = faceapi.resizeResults(detections, displaySize);
@@ -56,8 +58,10 @@ export default function useFaceDetection(
   
           canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
           faceapi.draw.drawDetections(canvas, resizedDetections);
+        } else {
+          setIsFaceDetected(false)
         }
-  
+
         setTimeout(() => {
           handleFaceTrack();
         }, 100);
@@ -76,5 +80,5 @@ export default function useFaceDetection(
       })();
     }, []);
   
-    return { isInFrame, isAreaFit, dimensions };
+    return { isInFrame, isAreaFit, dimensions, isFaceDetected };
   }
