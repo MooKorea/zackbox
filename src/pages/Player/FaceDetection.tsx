@@ -57,7 +57,7 @@ export default function FaceDetection() {
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center gap-4">
-      <div>{status}</div>
+      <div>{isFaceCaptured ? "Photo taken!" : status}</div>
       <div className="relative w-screen px-12 flex justify-center">
         <video
           ref={videoRef}
@@ -82,7 +82,7 @@ export default function FaceDetection() {
         <FaceGraphic
           className="absolute top-[50%] -translate-y-1/2 scale-[1.3]"
           width={face.dimensions.x / 3}
-          isValid={face.isAreaFit && face.isInFrame}
+          isValid={face.isAreaFit && face.isInFrame && face.isFaceDetected}
           isFaceCaptured={isFaceCaptured}
         />
       </div>
@@ -107,7 +107,7 @@ export default function FaceDetection() {
             takePhoto();
           }}
           className={`text-white rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
-            face.isAreaFit && face.isInFrame && !isFaceCaptured
+            face.isAreaFit && face.isInFrame && face.isFaceDetected
               ? "bg-primary"
               : "bg-gray-600 text-gray-400 pointer-events-none"
           }`}
