@@ -1,37 +1,38 @@
 import { useRef, useState } from "react";
 import useFaceDetection from "./useFaceDetection";
 import FaceGraphic from "./FaceGraphic";
+import { useNavigate } from "react-router-dom";
 
 export default function FaceDetection() {
   const videoRef = useRef<HTMLVideoElement>(null!);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
+  const navigate = useNavigate();
 
   const [isFaceCaptured, setIsFaceCaptured] = useState(false);
 
-  const { isInFrame, isAreaFit, dimensions, isFaceDetected, handleFaceTrack } =
-    useFaceDetection(videoRef, canvasRef, isFaceCaptured);
+  const face = useFaceDetection(videoRef, canvasRef, isFaceCaptured);
 
-  const pillX = (dimensions.x / 3) * 1.25;
-  const pillY = (dimensions.x / 3) * 1.7;
+  const pillX = (face.dimensions.x / 3) * 1.25;
+  const pillY = (face.dimensions.x / 3) * 1.7;
 
   const photoCanvasRef = useRef<HTMLCanvasElement>(null!);
   const photoCanvasRef2 = useRef<HTMLCanvasElement>(null!);
   const takePhoto = () => {
-    if (!(isAreaFit && isInFrame && isFaceDetected)) return;
+    if (!(face.isAreaFit && face.isInFrame && face.isFaceDetected)) return;
     if (isFaceCaptured) return;
     setIsFaceCaptured(true);
     window.FaceTrack = false;
 
     const canvas = photoCanvasRef.current;
     const context = canvas.getContext("2d");
-    context?.drawImage(videoRef.current, 0, 0, dimensions.x, dimensions.y);
+    context?.drawImage(videoRef.current, 0, 0, face.dimensions.x, face.dimensions.y);
 
     const canvas2 = photoCanvasRef2.current;
     const context2 = canvas2.getContext("2d");
     context2?.drawImage(
       canvas,
-      (dimensions.x - pillX) / 2,
-      (dimensions.y - pillY) / 2,
+      (face.dimensions.x - pillX) / 2,
+      (face.dimensions.y - pillY) / 2,
       pillX,
       pillY,
       0,
@@ -44,18 +45,18 @@ export default function FaceDetection() {
   };
 
   let status: string;
-  if (!isFaceDetected) {
+  if (!face.isFaceDetected) {
     status = "No face detected";
-  } else if (!isAreaFit) {
+  } else if (!face.isAreaFit) {
     status = "Face not big enough";
-  } else if (!isInFrame) {
+  } else if (!face.isInFrame) {
     status = "Face not centered";
   } else {
     status = "Ready to capture!";
   }
 
   return (
-    <div className="w-full flex flex-col items-center justify-center gap-4">
+    <div className="w-screen h-screen flex flex-col items-center justify-center gap-4">
       <div>{status}</div>
       <div className="relative w-screen px-12 flex justify-center">
         <video
@@ -80,8 +81,8 @@ export default function FaceDetection() {
         ></canvas>
         <FaceGraphic
           className="absolute top-[50%] -translate-y-1/2 scale-[1.3]"
-          width={dimensions.x / 3}
-          isValid={isAreaFit && isInFrame}
+          width={face.dimensions.x / 3}
+          isValid={face.isAreaFit && face.isInFrame}
           isFaceCaptured={isFaceCaptured}
         />
       </div>
@@ -91,23 +92,22 @@ export default function FaceDetection() {
           onClick={() => {
             setIsFaceCaptured(false);
             window.FaceTrack = true;
-            handleFaceTrack(videoRef.current, canvasRef.current);
+            face.handleFaceTrack(videoRef.current, canvasRef.current);
             photoCanvasRef2.current
               .getContext("2d")
               ?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
           }}
-          className={`text-white rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide bg-primary`}
+          className={`text-white rounded-lg transition-colors h-12 w-[8rem] font-extrabold tracking-wide border-4 border-primary`}
         >
           Retake
         </button>
       ) : (
         <button
-          id="stop-interval-button"
           onClick={() => {
             takePhoto();
           }}
           className={`text-white rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
-            isAreaFit && isInFrame && !isFaceCaptured
+            face.isAreaFit && face.isInFrame && !isFaceCaptured
               ? "bg-primary"
               : "bg-gray-600 text-gray-400 pointer-events-none"
           }`}
@@ -115,11 +115,23 @@ export default function FaceDetection() {
           Take Photo
         </button>
       )}
+      <button
+        onClick={() => {
+          navigate("/voice");
+        }}
+        className={`text-white rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
+          isFaceCaptured
+            ? "bg-primary"
+            : "border-gray-600 border-4 text-gray-500 pointer-events-none"
+        }`}
+      >
+        Next
+      </button>
       <canvas
         className="hidden"
         ref={photoCanvasRef}
-        width={dimensions.x}
-        height={dimensions.y}
+        width={face.dimensions.x}
+        height={face.dimensions.y}
       ></canvas>
     </div>
   );

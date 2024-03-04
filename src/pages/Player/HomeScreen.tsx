@@ -24,7 +24,7 @@ export default function HomeScreen({ setIsGameEnter }: HomeScreen) {
   const [codeInput, setCodeInput] = useState("");
 
   return (
-    <>
+    <div className="w-screen h-screen flex flex-col items-center justify-center">
       <h1>ZACKBOX!</h1>
       <form className="flex flex-col items-center gap-4" onSubmit={handleSubmit}>
         <input
@@ -47,6 +47,6 @@ export default function HomeScreen({ setIsGameEnter }: HomeScreen) {
           }`}
         />
       </form>
-    </>
+    </div>
   );
 }
