@@ -1,8 +1,9 @@
-import { Routes, Route } from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Player from "./pages/Player";
 import Host from "./pages/Host";
 import FaceDetection from "./pages/Player/FaceDetection";
-import RecordVoice from "./pages/Player/RecordVoice";
+import UnityControls from "./pages/Player/UnityControls";
+import { AppContextProvider } from "./Contexts";
 
 declare global {
   interface Window {
@@ -15,13 +16,24 @@ declare global {
 
 window.IsAudioRecord = false;
 
+const PageNotFound = (
+  <div className="w-screen h-screen flex-col flex justify-center items-center">
+    <h1>404</h1>
+    <h2>Page not found</h2>
+  </div>
+);
+
+const router = createBrowserRouter([
+  { path: "/", Component: Player, errorElement: PageNotFound },
+  { path: "/photo", Component: FaceDetection },
+  { path: "/controls", Component: UnityControls },
+  { path: "/game", Component: Host },
+]);
+
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Player />} />
-      <Route path="/photo" element={<FaceDetection />} />
-      <Route path="/voice" element={<RecordVoice />} />
-      <Route path="/game" element={<Host />} />
-    </Routes>
+    <AppContextProvider>
+      <RouterProvider router={router} />;
+    </AppContextProvider>
   );
 }

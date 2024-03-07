@@ -1,26 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useAudioRecorder } from "react-audio-voice-recorder";
 import { motion, useAnimate } from "framer-motion";
+import { useAppContext } from "../../Contexts";
+import * as FFmpeg from "@ffmpeg/ffmpeg";
+import { indexeddb } from "../../indexeddb";
 
 function volumeCurve(x: number) {
   return 1 - 1 / (1 + 20 * x);
 }
 
-const draw = {
-  hidden: { pathLength: 0, opacity: 0 },
-  visible: (i: number) => {
-    return {
-      pathLength: 1,
-      opacity: 1,
-      transition: {
-        pathLength: { type: "spring", duration: 1.5, bounce: 0 },
-        opacity: { duration: 0.01 },
-      },
-    };
-  },
-};
+interface RecordVoice {
+  setVoiceSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-export default function RecordVoice() {
+export default function RecordVoice({ setVoiceSubmitted }: RecordVoice) {
   const ref = useRef<HTMLDivElement>(null!);
   const audioRef = useRef<HTMLAudioElement>(null!);
   const { startRecording, stopRecording, recordingBlob, isRecording } =
@@ -85,15 +78,58 @@ export default function RecordVoice() {
     stopRecording();
   }, [isFinished]);
 
+  const convertToDownloadFileExtension = async (webmBlob: Blob): Promise<Blob> => {
+    const ffmpeg = FFmpeg.createFFmpeg({ log: false });
+    await ffmpeg.load();
+
+    const inputName = "input.webm";
+    const outputName = `output.mp3`;
+
+    ffmpeg.FS("writeFile", inputName, new Uint8Array(await webmBlob.arrayBuffer()));
+
+    await ffmpeg.run("-i", inputName, outputName);
+
+    const outputData = ffmpeg.FS("readFile", outputName);
+    const outputBlob = new Blob([outputData.buffer], {
+      type: `audio/mp3`,
+    });
+
+    return outputBlob;
+  };
+
+  async function addFriend(blob: Blob) {
+    try {
+      // Add the new friend!
+      const id = await indexeddb.data.add({
+        voiceAudio: "TEST"
+      });
+    } catch (error) {
+      console.log(`Failed to add data: ${error}`);
+    }
+  }
+
+  const { setVoiceDataURL } = useAppContext();
   useEffect(() => {
     if (!recordingBlob) return;
-    const url = URL.createObjectURL(recordingBlob);
-    audioRef.current.src = url;
-    audioRef.current.controls = true;
+    (async () => {
+      const mp3Blob = await convertToDownloadFileExtension(recordingBlob);
+      const url = URL.createObjectURL(mp3Blob);
+      audioRef.current.src = url;
+      audioRef.current.controls = true;
+      // setVoiceDataURL(url)
+      addFriend(mp3Blob)
+      // console.log(recordingBlob)
+      const reader = new FileReader();
+      reader.readAsDataURL(mp3Blob);
+      reader.onloadend = () => {
+        console.log(reader.result)
+        setVoiceDataURL(reader.result as string);
+      };
+    })();
   }, [recordingBlob]);
 
   return (
-    <div className="w-screen h-screen flex flex-col items-center justify-center gap-4">
+    <div className="w-screen h-screen flex flex-col items-center justify-center gap-4 z-10">
       <div>{isFinished ? "Recording Complete!" : "Make a 1 second sound!"}</div>
       <div className="w-[15rem] h-[15rem] rounded-full border-gray-600 border-2 flex items-center justify-center">
         <div ref={ref} className="bg-[#5345f5]/[0.3] rounded-full absolute"></div>
@@ -152,7 +188,7 @@ export default function RecordVoice() {
 
         <button
           onClick={() => {
-            console.log("next");
+            setVoiceSubmitted(true);
           }}
           className={`text-white rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
             isFinished ? "bg-primary" : "bg-gray-600 text-gray-400 pointer-events-none"
@@ -163,4 +199,7 @@ export default function RecordVoice() {
       </div>
     </div>
   );
+}
+function createFFmpeg(arg0: { log: boolean }) {
+  throw new Error("Function not implemented.");
 }

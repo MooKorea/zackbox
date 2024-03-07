@@ -2,11 +2,13 @@ import { useRef, useState } from "react";
 import useFaceDetection from "./useFaceDetection";
 import FaceGraphic from "./FaceGraphic";
 import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../../Contexts";
 
 export default function FaceDetection() {
   const videoRef = useRef<HTMLVideoElement>(null!);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const navigate = useNavigate();
+  const { setFaceDataURL, setSkinColor } = useAppContext();
 
   const [isFaceCaptured, setIsFaceCaptured] = useState(false);
 
@@ -41,7 +43,11 @@ export default function FaceDetection() {
       pillY
     );
 
-    const frame = canvas.toDataURL("image/png");
+    const frame = canvas2.toDataURL("image/png");
+    const pixel = context2?.getImageData(pillX / 2, pillY / 2, 1, 1).data
+    // console.log(pixel!.join("x"))
+    setSkinColor(pixel!.join("x"))
+    setFaceDataURL(frame);
   };
 
   let status: string;
@@ -117,7 +123,7 @@ export default function FaceDetection() {
       )}
       <button
         onClick={() => {
-          navigate("/voice");
+          navigate("/controls");
         }}
         className={`text-white rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
           isFaceCaptured
