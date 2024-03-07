@@ -105,9 +105,9 @@ export default function RecordVoice({ setVoiceSubmitted }: RecordVoice) {
       audioRef.current.src = url;
       audioRef.current.controls = true;
       
-      const mp3Blob = await convertToDownloadFileExtension(recordingBlob);
+      const webmBlob = await convertToDownloadFileExtension(recordingBlob);
       const reader = new FileReader();
-      reader.readAsDataURL(mp3Blob);
+      reader.readAsDataURL(webmBlob);
       reader.onloadend = () => {
         setVoiceDataURL(reader.result as string);
       };

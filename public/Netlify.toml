@@ -45,3 +45,10 @@
   [headers.values]
     Content-Encoding = "br"
     Content-Type = "application/javascript"
+
+[[headers]]
+  # Define which paths this specific [[headers]] block will cover.
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
