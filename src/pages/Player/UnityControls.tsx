@@ -39,7 +39,6 @@ function UnityPlayer({ ...props }: UnityPlayer) {
     }
 
     if (voiceDataURL != "") {
-      console.log("data sent")
       sendMessage("Zii", "LoadVoice", voiceDataURL);
     }
   }, [isLoaded, faceDataURL, voiceDataURL, skinColor]);

@@ -12,8 +12,6 @@
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.11.6",
     "@ffmpeg/util": "^0.12.1",
-    "dexie": "^3.2.6",
-    "dexie-react-hooks": "^1.1.7",
     "face-api.js": "^0.20.0",
     "firebase": "^10.8.1",
     "framer-motion": "^10.16.16",

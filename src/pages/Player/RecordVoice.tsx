@@ -3,7 +3,6 @@ import { useAudioRecorder } from "react-audio-voice-recorder";
 import { motion, useAnimate } from "framer-motion";
 import { useAppContext } from "../../Contexts";
 import * as FFmpeg from "@ffmpeg/ffmpeg";
-import { indexeddb } from "../../indexeddb";
 
 function volumeCurve(x: number) {
   return 1 - 1 / (1 + 20 * x);
@@ -83,7 +82,7 @@ export default function RecordVoice({ setVoiceSubmitted }: RecordVoice) {
     await ffmpeg.load();
 
     const inputName = "input.webm";
-    const outputName = `output.mp3`;
+    const outputName = `output.wav`;
 
     ffmpeg.FS("writeFile", inputName, new Uint8Array(await webmBlob.arrayBuffer()));
 
@@ -91,38 +90,25 @@ export default function RecordVoice({ setVoiceSubmitted }: RecordVoice) {
 
     const outputData = ffmpeg.FS("readFile", outputName);
     const outputBlob = new Blob([outputData.buffer], {
-      type: `audio/mp3`,
+      type: `audio/wav`,
     });
 
     return outputBlob;
   };
 
-  async function addFriend(blob: Blob) {
-    try {
-      // Add the new friend!
-      const id = await indexeddb.data.add({
-        voiceAudio: "TEST"
-      });
-    } catch (error) {
-      console.log(`Failed to add data: ${error}`);
-    }
-  }
-
   const { setVoiceDataURL } = useAppContext();
   useEffect(() => {
     if (!recordingBlob) return;
     (async () => {
-      const mp3Blob = await convertToDownloadFileExtension(recordingBlob);
-      const url = URL.createObjectURL(mp3Blob);
+
+      const url = URL.createObjectURL(recordingBlob);
       audioRef.current.src = url;
       audioRef.current.controls = true;
-      // setVoiceDataURL(url)
-      addFriend(mp3Blob)
-      // console.log(recordingBlob)
+      
+      const mp3Blob = await convertToDownloadFileExtension(recordingBlob);
       const reader = new FileReader();
       reader.readAsDataURL(mp3Blob);
       reader.onloadend = () => {
-        console.log(reader.result)
         setVoiceDataURL(reader.result as string);
       };
     })();
