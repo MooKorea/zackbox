@@ -8,7 +8,7 @@ export default function FaceDetection() {
   const videoRef = useRef<HTMLVideoElement>(null!);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const navigate = useNavigate();
-  const { setFaceDataURL, setSkinColor, code } = useAppContext();
+  const { setPhotoBlob, setSkinColor, code } = useAppContext();
 
   useEffect(() => {
     if (code === "") {
@@ -33,7 +33,13 @@ export default function FaceDetection() {
 
     const canvas = photoCanvasRef.current;
     const context = canvas.getContext("2d");
-    context?.drawImage(videoRef.current, 0, 0, face.dimensions.x, face.dimensions.y);
+    context?.drawImage(
+      videoRef.current,
+      0,
+      0,
+      face.dimensions.x,
+      face.dimensions.y
+    );
 
     const canvas2 = photoCanvasRef2.current;
     const context2 = canvas2.getContext("2d");
@@ -49,10 +55,11 @@ export default function FaceDetection() {
       pillY
     );
 
-    const frame = canvas2.toDataURL("image/png");
+    canvas2.toBlob((blob) => {
+      setPhotoBlob(blob);
+    });
     const pixel = context2?.getImageData(pillX / 2, pillY / 2, 1, 1).data;
     setSkinColor(pixel!.join("x"));
-    setFaceDataURL(frame);
   };
 
   let status: string;
@@ -106,7 +113,12 @@ export default function FaceDetection() {
             face.handleFaceTrack(videoRef.current, canvasRef.current);
             photoCanvasRef2.current
               .getContext("2d")
-              ?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+              ?.clearRect(
+                0,
+                0,
+                canvasRef.current.width,
+                canvasRef.current.height
+              );
           }}
           className={`text-white rounded-lg transition-colors h-12 w-[8rem] font-extrabold tracking-wide border-4 border-primary`}
         >

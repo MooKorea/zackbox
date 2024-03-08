@@ -1,12 +1,14 @@
 import { createContext, useContext, useState } from "react";
 
 type AppContext = {
-  faceDataURL: string;
-  setFaceDataURL: React.Dispatch<React.SetStateAction<string>>;
+  photoBlob: Blob | null;
+  setPhotoBlob: React.Dispatch<React.SetStateAction<Blob | null>>;
   skinColor: string;
   setSkinColor: React.Dispatch<React.SetStateAction<string>>;
   voiceDataURL: string;
   setVoiceDataURL: React.Dispatch<React.SetStateAction<string>>;
+  voiceBlob: Blob | null;
+  setVoiceBlob: React.Dispatch<React.SetStateAction<Blob | null>>;
   code: string;
   setCode: React.Dispatch<React.SetStateAction<string>>;
 };
@@ -18,23 +20,30 @@ export const enum UIState {
   Map,
 }
 
-export function AppContextProvider({ children }: { children: React.ReactNode }) {
-  const [faceDataURL, setFaceDataURL] = useState("");
+export function AppContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [voiceDataURL, setVoiceDataURL] = useState("");
+  const [voiceBlob, setVoiceBlob] = useState<Blob | null>(null);
   const [skinColor, setSkinColor] = useState("");
   const [code, setCode] = useState("");
 
   return (
     <AppContext.Provider
       value={{
-        faceDataURL,
-        setFaceDataURL,
+        photoBlob,
+        setPhotoBlob,
         skinColor,
         setSkinColor,
         voiceDataURL,
         setVoiceDataURL,
+        voiceBlob,
+        setVoiceBlob,
         code,
-        setCode,
+        setCode
       }}
     >
       {children}

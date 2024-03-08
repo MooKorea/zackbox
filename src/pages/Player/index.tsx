@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../firebase";
-import { onValue, ref } from "firebase/database";
+import { get, ref } from "firebase/database";
 import { useAppContext } from "../../Contexts";
 
 export default function Player() {
@@ -18,7 +18,7 @@ export default function Player() {
 
   const [isInvalidCode, setIsInvalidCode] = useState(false);
   const { setCode } = useAppContext();
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     // if (import.meta.env.MODE === "development") {
     //   navigate("/photo");
@@ -28,14 +28,14 @@ export default function Player() {
     if (codeInput.length !== 4) return;
 
     const checkRef = ref(db, `games/${codeInput}`);
-    onValue(checkRef, (snapshot) => {
-      if (snapshot.val() === null) {
-        setIsInvalidCode(true);
-      } else {
-        setCode(snapshot.val().code);
-        navigate("/photo");
-      }
-    });
+    const snapshot = await get(checkRef);
+    if (snapshot.val() === null) {
+      setIsInvalidCode(true);
+    } else {
+      setCode(snapshot.val().code);
+      navigate("/photo");
+    }
+
   };
 
   const [codeInput, setCodeInput] = useState("");

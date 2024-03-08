@@ -5,9 +5,9 @@ import { useAppContext } from "../../Contexts";
 import { useNavigate } from "react-router-dom";
 import { ReactUnityEventParameter } from "react-unity-webgl/distribution/types/react-unity-event-parameters";
 import { db } from "../../firebase";
-import { ref, set } from "firebase/database";
+import { ref, set, remove } from "firebase/database";
 import { storage } from "../../firebase";
-import { ref as sRef, uploadString } from "firebase/storage";
+import { ref as sRef, uploadBytes } from "firebase/storage";
 
 export default function UnityControls() {
   const [voiceSubmitted, setVoiceSubmitted] = useState(false);
@@ -23,61 +23,94 @@ export default function UnityControls() {
 type UnityPlayer = React.HTMLAttributes<HTMLDivElement>;
 
 function UnityPlayer({ ...props }: UnityPlayer) {
-  const { unityProvider, isLoaded, sendMessage, addEventListener, removeEventListener } =
-    useUnityContext({
-      loaderUrl: "./Player/Build/Player.loader.js",
-      dataUrl: "./Player/Build/Player.data.br",
-      frameworkUrl: "./Player/Build/Player.framework.js.br",
-      codeUrl: "./Player/Build/Player.wasm.br",
-    });
-  const { faceDataURL, voiceDataURL, skinColor, code } = useAppContext();
+  const game = useUnityContext({
+    loaderUrl: "./Player/Build/Player.loader.js",
+    dataUrl: "./Player/Build/Player.data.br",
+    frameworkUrl: "./Player/Build/Player.framework.js.br",
+    codeUrl: "./Player/Build/Player.wasm.br",
+  });
+  const data = useAppContext();
   const navigate = useNavigate();
+  const [playerId, setPlayerId] = useState(0);
+  const handleRemoveData = () => {
+    const playerRef = ref(db, `games/on60/${playerId}`);
+    remove(playerRef);
+  };
 
   useEffect(() => {
-    if (import.meta.env.MODE === "development") return;
-
-    if (code === "") {
+    if (data.code === "") {
       navigate("/");
     }
+
+    window.addEventListener("unload", handleRemoveData);
+    return () => {
+      window.removeEventListener("unload", handleRemoveData);
+      handleRemoveData();
+    };
   }, []);
 
-  const handleSendData = useCallback((...parameters: ReactUnityEventParameter[]) => {
-    const playerId = Date.now();
-    uploadString(sRef(storage, `games/on60/${playerId}/photo`), faceDataURL, 'data_url')
-    uploadString(sRef(storage, `games/on60/${playerId}/voice`), voiceDataURL, 'data_url')
+  const handleSendData = useCallback(
+    (...parameters: ReactUnityEventParameter[]) => {
+      const playerId = Date.now();
+      setPlayerId(playerId);
+      if (data.photoBlob !== null) {
+        uploadBytes(
+          sRef(storage, `games/on60/${playerId}/photo`),
+          data.photoBlob
+        );
+      }
+      
+      console.log(data.voiceBlob)
+      if (data.voiceBlob !== null) {
+        uploadBytes(
+          sRef(storage, `games/on60/${playerId}/voice`),
+          data.voiceBlob
+        );
+      }
 
-    const gameRef = ref(db, `games/on60/${playerId}`);
-    set(gameRef, {
-      name: parameters[0],
-      hairIndex: parameters[1],
-      hairCol: parameters[2],
-      shirtCol: parameters[3],
-      pantsCol: parameters[4],
-    });
-  }, []);
+      const playerRef = ref(db, `games/on60/${playerId}`);
+      set(playerRef, {
+        id: playerId,
+        name: parameters[0],
+        hairIndex: parameters[1],
+        hairCol: parameters[2],
+        shirtCol: parameters[3],
+        pantsCol: parameters[4],
+        skinColor: data.skinColor,
+      });
+    },
+    [data.voiceBlob]
+  );
 
   useEffect(() => {
-    addEventListener("SendPlayerAppearanceData", handleSendData);
+    game.addEventListener("SendPlayerAppearanceData", handleSendData);
     return () => {
-      removeEventListener("SendPlayerAppearanceData", handleSendData);
+      game.removeEventListener("SendPlayerAppearanceData", handleSendData);
     };
   }, [addEventListener, removeEventListener, handleSendData]);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (faceDataURL != "") {
-      sendMessage("Zii", "LoadFace", faceDataURL);
-      sendMessage("Zii", "LoadSkinColor", skinColor);
+    if (!game.isLoaded) return;
+    if (data.photoBlob != null) {
+      const reader = new FileReader();
+      reader.readAsDataURL(data.photoBlob);
+      reader.onloadend = () => {
+        game.sendMessage("Zii", "LoadFace", reader.result as string);
+      };
+      game.sendMessage("Zii", "LoadSkinColor", data.skinColor);
     }
 
-    if (voiceDataURL != "") {
-      sendMessage("Zii", "LoadVoice", voiceDataURL);
+    if (data.voiceDataURL != "") {
+      game.sendMessage("Zii", "LoadVoice", data.voiceDataURL);
     }
-  }, [isLoaded, faceDataURL, voiceDataURL, skinColor]);
+  }, [game.isLoaded, data]);
 
   return (
     <div className={props.className}>
-      <Unity unityProvider={unityProvider} className="w-full h-full absolute top-0" />
+      <Unity
+        unityProvider={game.unityProvider}
+        className="w-full h-full absolute top-0"
+      />
     </div>
   );
 }

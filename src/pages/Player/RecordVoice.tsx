@@ -21,7 +21,7 @@ export default function RecordVoice({ setVoiceSubmitted }: RecordVoice) {
   const [isListening, setIsListening] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
-  const voiceThreshold = 0.04;
+  const voiceThreshold = 0.02;
   const onFrame = (analyserNode: AnalyserNode, pcmData: Float32Array) => {
     if (!window.IsAudioRecord) return;
     analyserNode.getFloatTimeDomainData(pcmData);
@@ -77,12 +77,12 @@ export default function RecordVoice({ setVoiceSubmitted }: RecordVoice) {
     stopRecording();
   }, [isFinished]);
 
-  const convertToDownloadFileExtension = async (webmBlob: Blob): Promise<Blob> => {
+  const convertToDownloadFileExtension = async (webmBlob: Blob, fileExtension: "wav" | "mp3"): Promise<Blob> => {
     const ffmpeg = FFmpeg.createFFmpeg({ log: false });
     await ffmpeg.load();
 
     const inputName = "input.webm";
-    const outputName = `output.wav`;
+    const outputName = `output.${fileExtension}`;
 
     ffmpeg.FS("writeFile", inputName, new Uint8Array(await webmBlob.arrayBuffer()));
 
@@ -90,13 +90,13 @@ export default function RecordVoice({ setVoiceSubmitted }: RecordVoice) {
 
     const outputData = ffmpeg.FS("readFile", outputName);
     const outputBlob = new Blob([outputData.buffer], {
-      type: `audio/wav`,
+      type: `audio/${fileExtension}`,
     });
 
     return outputBlob;
   };
 
-  const { setVoiceDataURL } = useAppContext();
+  const { setVoiceDataURL, setVoiceBlob } = useAppContext();
   useEffect(() => {
     if (!recordingBlob) return;
     (async () => {
@@ -105,12 +105,16 @@ export default function RecordVoice({ setVoiceSubmitted }: RecordVoice) {
       audioRef.current.src = url;
       audioRef.current.controls = true;
       
-      const webmBlob = await convertToDownloadFileExtension(recordingBlob);
+      const wavBlob = convertToDownloadFileExtension(recordingBlob, "wav");
+      const mp3Blob = convertToDownloadFileExtension(recordingBlob, "mp3");
+      const [wavRes, mp3Res] = await Promise.all([wavBlob, mp3Blob])
       const reader = new FileReader();
-      reader.readAsDataURL(webmBlob);
+      reader.readAsDataURL(wavRes);
       reader.onloadend = () => {
         setVoiceDataURL(reader.result as string);
       };
+      setVoiceBlob(mp3Res)
+
     })();
   }, [recordingBlob]);
 
