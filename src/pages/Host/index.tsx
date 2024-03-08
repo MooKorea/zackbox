@@ -1,6 +1,8 @@
 import QRCodeStyling from "qr-code-styling-2";
 import { useEffect } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
+import { db } from "../../firebase";
+import { getDatabase, ref, set } from "firebase/database";
 
 function makeid(length: number) {
   let result = "";
@@ -25,7 +27,6 @@ export default function Host() {
   const HandleQRCode = () => {
     const code = makeid(4);
     const url = `${window.location.origin}?code=${code}`;
-    console.log(url);
     const qrCode = new QRCodeStyling({
       width: 200,
       height: 200,
@@ -54,6 +55,11 @@ export default function Host() {
         sendMessage("Canvas", "CreateCode", code);
       };
     })();
+
+    set(ref(db, "games/" + code), {
+      code: code
+    })
+
   };
 
   useEffect(() => {

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { db } from "../../firebase";
+import { onValue, ref } from "firebase/database";
+import { useAppContext } from "../../Contexts";
 
 export default function Player() {
   const inputRef = useRef<HTMLInputElement>(null!);
@@ -13,9 +16,26 @@ export default function Player() {
     setCodeInput(code);
   }, []);
 
+  const [isInvalidCode, setIsInvalidCode] = useState(false);
+  const { setCode } = useAppContext();
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (codeInput.length === 4) navigate("/photo");
+    // if (import.meta.env.MODE === "development") {
+    //   navigate("/photo");
+    //   return;
+    // }
+
+    if (codeInput.length !== 4) return;
+
+    const checkRef = ref(db, `games/${codeInput}`);
+    onValue(checkRef, (snapshot) => {
+      if (snapshot.val() === null) {
+        setIsInvalidCode(true);
+      } else {
+        setCode(snapshot.val().code);
+        navigate("/photo");
+      }
+    });
   };
 
   const [codeInput, setCodeInput] = useState("");
@@ -23,7 +43,7 @@ export default function Player() {
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center">
       <h1>ZACKBOX!</h1>
-      <form className="flex flex-col items-center gap-4" onSubmit={handleSubmit}>
+      <form className="relative flex flex-col items-center gap-4" onSubmit={handleSubmit}>
         <input
           ref={inputRef}
           autoComplete="off"
@@ -43,6 +63,9 @@ export default function Player() {
               : "bg-gray-600 text-gray-400 pointer-events-none"
           }`}
         />
+        {isInvalidCode && (
+          <div className="absolute bottom-[-2.5rem] text-red-400">Invalid Code!</div>
+        )}
       </form>
     </div>
   );

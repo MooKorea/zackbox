@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useFaceDetection from "./useFaceDetection";
 import FaceGraphic from "./FaceGraphic";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,13 @@ export default function FaceDetection() {
   const videoRef = useRef<HTMLVideoElement>(null!);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const navigate = useNavigate();
-  const { setFaceDataURL, setSkinColor } = useAppContext();
+  const { setFaceDataURL, setSkinColor, code } = useAppContext();
+
+  useEffect(() => {
+    if (code === "") {
+      navigate("/");
+    }
+  }, []);
 
   const [isFaceCaptured, setIsFaceCaptured] = useState(false);
 
@@ -44,9 +50,8 @@ export default function FaceDetection() {
     );
 
     const frame = canvas2.toDataURL("image/png");
-    const pixel = context2?.getImageData(pillX / 2, pillY / 2, 1, 1).data
-    // console.log(pixel!.join("x"))
-    setSkinColor(pixel!.join("x"))
+    const pixel = context2?.getImageData(pillX / 2, pillY / 2, 1, 1).data;
+    setSkinColor(pixel!.join("x"));
     setFaceDataURL(frame);
   };
 

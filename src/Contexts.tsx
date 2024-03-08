@@ -7,19 +7,22 @@ type AppContext = {
   setSkinColor: React.Dispatch<React.SetStateAction<string>>;
   voiceDataURL: string;
   setVoiceDataURL: React.Dispatch<React.SetStateAction<string>>;
+  code: string;
+  setCode: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const AppContext = createContext<AppContext | null>(null);
 
 export const enum UIState {
   Home,
-  Map
+  Map,
 }
 
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [faceDataURL, setFaceDataURL] = useState("");
   const [voiceDataURL, setVoiceDataURL] = useState("");
-  const [skinColor, setSkinColor] = useState("")
+  const [skinColor, setSkinColor] = useState("");
+  const [code, setCode] = useState("");
 
   return (
     <AppContext.Provider
@@ -30,6 +33,8 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
         setSkinColor,
         voiceDataURL,
         setVoiceDataURL,
+        code,
+        setCode,
       }}
     >
       {children}
