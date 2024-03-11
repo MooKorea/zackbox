@@ -43,6 +43,7 @@ export default function Player() {
     }
   };
 
+  const [test, setTest] = useState(false);
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center">
       <h1>ZACKBOX!</h1>
@@ -69,16 +70,18 @@ export default function Player() {
           onChange={(e) => setNameInput(e.target.value)}
           className="py-2 rounded-lg px-2 text-lg font-bold text-center tracking-wide w-[8rem]"
         />
-        <button
+        <input
           type="submit"
           value="GO!"
+          onClick={() => setTest(true)}
           className={`text-white cursor-pointer rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
             codeInput.join('').length === 4 && nameInput.length > 0
               ? "bg-primary pointer-events-auto"
               : "bg-gray-600 text-gray-400 pointer-events-none"
           }`}
-        >GO!</button>
+        />
       </form>
+      {test && <div>working</div>}
     </div>
   );
 }
