@@ -69,7 +69,7 @@ export default function Player() {
           onChange={(e) => setNameInput(e.target.value)}
           className="py-2 rounded-lg px-2 text-lg font-bold text-center tracking-wide w-[8rem]"
         />
-        <input
+        <button
           type="submit"
           value="GO!"
           className={`text-white cursor-pointer rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
@@ -77,7 +77,7 @@ export default function Player() {
               ? "bg-primary pointer-events-auto"
               : "bg-gray-600 text-gray-400 pointer-events-none"
           }`}
-        />
+        >GO!</button>
       </form>
     </div>
   );
