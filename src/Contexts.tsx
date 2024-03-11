@@ -11,6 +11,8 @@ type AppContext = {
   setVoiceBlob: React.Dispatch<React.SetStateAction<Blob | null>>;
   code: string;
   setCode: React.Dispatch<React.SetStateAction<string>>;
+  name: string;
+  setName: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const AppContext = createContext<AppContext | null>(null);
@@ -30,6 +32,7 @@ export function AppContextProvider({
   const [voiceBlob, setVoiceBlob] = useState<Blob | null>(null);
   const [skinColor, setSkinColor] = useState("");
   const [code, setCode] = useState("");
+  const [name, setName] = useState("")
 
   return (
     <AppContext.Provider
@@ -43,7 +46,9 @@ export function AppContextProvider({
         voiceBlob,
         setVoiceBlob,
         code,
-        setCode
+        setCode,
+        name,
+        setName
       }}
     >
       {children}

@@ -18,7 +18,9 @@
     "qr-code-styling-2": "^1.5.5",
     "react": "^18.2.0",
     "react-audio-voice-recorder": "^2.2.0",
+    "react-code-input": "^3.10.1",
     "react-dom": "^18.2.0",
+    "react-input-pin-code": "^1.2.1",
     "react-router-dom": "^6.22.2",
     "react-unity-webgl": "^9.5.0"
   },
