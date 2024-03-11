@@ -60,7 +60,7 @@ export default function Host() {
       code: code
     })
 
-    onValue(ref(db, `games/4935/joined`), (snapshot) => {
+    onValue(ref(db, `games/${code}/joined`), (snapshot) => {
       console.log(snapshot.val())
       sendMessage("Player Spawners", "SpawnPlayer", JSON.stringify(snapshot.val()))
     })
