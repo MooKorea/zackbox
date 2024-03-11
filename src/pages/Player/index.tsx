@@ -7,7 +7,6 @@ import { PinInput } from "react-input-pin-code";
 
 export default function Player() {
   const [codeInput, setCodeInput] = useState(["", "", "", ""]);
-  const [isScanned, setIsScanned] = useState(false)
   const [nameInput, setNameInput] = useState("");
   const nameInputRef = useRef<HTMLInputElement>(null!);
   const navigate = useNavigate();
@@ -75,7 +74,7 @@ export default function Player() {
           value="GO!"
           className={`text-white cursor-pointer rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
             codeInput.join('').length === 4 && nameInput.length > 0
-              ? "bg-primary"
+              ? "bg-primary pointer-events-auto"
               : "bg-gray-600 text-gray-400 pointer-events-none"
           }`}
         />
@@ -83,20 +82,3 @@ export default function Player() {
     </div>
   );
 }
-
-// export default function Player() {
-//   const [isCanvas, setIsCanvas] = useState(false);
-//   const [isGameEnter, setIsGameEnter] = useState(false);
-//   const [isPhotoSubmitted, setIsPhotoSubmitted] = useState(false)
-
-//   return (
-//     <div className="w-screen h-screen flex flex-col items-center justify-center">
-//       {!isGameEnter && <HomeScreen setIsGameEnter={setIsGameEnter} />}
-//       {isGameEnter && <FaceDetection setIsPhotoSubmitted={setIsPhotoSubmitted} />}
-//       {/* <button onClick={() => setIsCanvas(true)}>enter canvas</button> */}
-//       {/* <div className={isCanvas ? "block" : "hidden"}>
-//         <UnityPlayer setIsCanvas={setIsCanvas} />
-//       </div> */}
-//     </div>
-//   );
-// }

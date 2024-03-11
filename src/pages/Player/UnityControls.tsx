@@ -15,7 +15,11 @@ export default function UnityControls() {
   return (
     <>
       {!voiceSubmitted && <RecordVoice setVoiceSubmitted={setVoiceSubmitted} />}
-      <UnityPlayer className={voiceSubmitted ? "block" : "hidden"} />
+      <UnityPlayer
+        className={`flex items-center justify-center ${
+          voiceSubmitted ? "block" : "hidden"
+        }`}
+      />
     </>
   );
 }
@@ -54,9 +58,11 @@ function UnityPlayer({ ...props }: UnityPlayer) {
     }
 
     const playerRef = ref(db, `games/${data.code}/${playerId}`);
-    onDisconnect(playerRef).remove().then(() => {
-      set(ref(db, `games/${data.code}/left`), { id: playerId });
-    });
+    onDisconnect(playerRef)
+      .remove()
+      .then(() => {
+        set(ref(db, `games/${data.code}/left`), { id: playerId });
+      });
   }, []);
 
   const getFileURLs = async (playerData: PlayerData) => {
@@ -128,6 +134,16 @@ function UnityPlayer({ ...props }: UnityPlayer) {
 
   return (
     <div className={props.className}>
+      <div
+        className="absolute top-[50%] w-[12rem] h-2 z-10"
+        style={{ display: game.isLoaded ? "none" : "block" }}
+      >
+        <div className="absolute w-full h-full bg-gray-600"></div>
+        <div
+          className="absolute h-full bg-primary"
+          style={{ width: `${game.loadingProgression * 100}%` }}
+        ></div>
+      </div>
       <Unity
         unityProvider={game.unityProvider}
         className="w-full h-full absolute top-0"

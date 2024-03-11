@@ -2,7 +2,7 @@ import QRCodeStyling from "qr-code-styling-2";
 import { useEffect } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { db } from "../../firebase";
-import { onValue, ref, set } from "firebase/database";
+import { onDisconnect, onValue, ref, set } from "firebase/database";
 
 function makeid(length: number) {
   let result = "";
@@ -61,9 +61,11 @@ export default function Host() {
     })
 
     onValue(ref(db, `games/${code}/joined`), (snapshot) => {
-      console.log(snapshot.val())
+      if (snapshot.val() == null) return;
       sendMessage("Player Spawners", "SpawnPlayer", JSON.stringify(snapshot.val()))
     })
+    
+    onDisconnect(ref(db, "games/" + code)).remove()
 
   };
 
@@ -72,6 +74,7 @@ export default function Host() {
     window.CreateGameQRCode = function () {
       HandleQRCode();
     };
+
   }, [isLoaded]);
 
   return (
