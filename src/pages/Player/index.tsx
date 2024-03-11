@@ -10,6 +10,8 @@ export default function Player() {
   const [nameInput, setNameInput] = useState("");
   const nameInputRef = useRef<HTMLInputElement>(null!);
   const navigate = useNavigate();
+  const [test, setTest] = useState(false);
+
   useEffect(() => {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -43,24 +45,23 @@ export default function Player() {
     }
   };
 
-  const [test, setTest] = useState(false);
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center">
       <h1>ZACKBOX!</h1>
-      <form className="relative flex flex-col items-center gap-4" onSubmit={handleSubmit}>
-        <div className={`bottom-[-2.5rem] ${isInvalidCode ? "text-red-400" : "text-gray-400"}`}>{isInvalidCode ? "Invalid Code!" : "Enter Code"}</div>
-        <PinInput
-          values={codeInput}
-          onChange={(value, index, values) => setCodeInput(values.map(e => e === " " ? "" : e))}
-          autoFocus
-          type="text"
-          inputClassName="font-nunito font-bold text-white pin-input"
-          placeholder=""
-          borderColor="rgb(90, 90, 90)"
-          focusBorderColor="rgb(83, 69, 245)"
-          validBorderColor="rgb(83, 69, 245)"
-          autoComplete="off"
-        />
+      <div className={`bottom-[-2.5rem] mb-4 ${isInvalidCode ? "text-red-400" : "text-gray-400"}`}>{isInvalidCode ? "Invalid Code!" : "Enter Code"}</div>
+      <PinInput
+        values={codeInput}
+        onChange={(value, index, values) => setCodeInput(values.map(e => e === " " ? "" : e))}
+        autoFocus
+        type="text"
+        inputClassName="font-nunito font-bold text-white pin-input"
+        placeholder=""
+        borderColor="rgb(90, 90, 90)"
+        focusBorderColor="rgb(83, 69, 245)"
+        validBorderColor="rgb(83, 69, 245)"
+        autoComplete="off"
+      />
+      <form className="relative flex flex-col items-center gap-4 mt-4" onSubmit={handleSubmit}>
         <input
           ref={nameInputRef}
           type="text"
@@ -73,7 +74,6 @@ export default function Player() {
         <input
           type="submit"
           value="GO!"
-          onClick={() => setTest(true)}
           className={`text-white cursor-pointer rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
             codeInput.join('').length === 4 && nameInput.length > 0
               ? "bg-primary pointer-events-auto"
