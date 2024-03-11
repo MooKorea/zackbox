@@ -5,7 +5,7 @@ import { useAppContext } from "../../Contexts";
 import { useNavigate } from "react-router-dom";
 import { ReactUnityEventParameter } from "react-unity-webgl/distribution/types/react-unity-event-parameters";
 import { db } from "../../firebase";
-import { ref, set, remove, onDisconnect } from "firebase/database";
+import { ref, set, onDisconnect } from "firebase/database";
 import { storage } from "../../firebase";
 import { ref as sRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -53,28 +53,35 @@ function UnityPlayer({ ...props }: UnityPlayer) {
       navigate("/");
     }
 
-    const playerRef = ref(db, `games/on60/${playerId}`);
-    onDisconnect(playerRef).remove();
+    const playerRef = ref(db, `games/${data.code}/${playerId}`);
+    onDisconnect(playerRef).remove().then(() => {
+      set(ref(db, `games/${data.code}/left`), { id: playerId });
+    });
   }, []);
 
   const getFileURLs = async (playerData: PlayerData) => {
     if (data.photoBlob !== null && data.voiceBlob !== null) {
       await Promise.all([
-        uploadBytes(sRef(storage, `games/on60/${playerId}/photo`), data.photoBlob),
-        uploadBytes(sRef(storage, `games/on60/${playerId}/voice`), data.voiceBlob),
+        uploadBytes(
+          sRef(storage, `games/${data.code}/${playerId}/photo`),
+          data.photoBlob
+        ),
+        uploadBytes(
+          sRef(storage, `games/${data.code}/${playerId}/voice`),
+          data.voiceBlob
+        ),
       ]);
     }
     const [faceTextureURL, voiceClipURL] = await Promise.all([
-      getDownloadURL(sRef(storage, `games/on60/${playerId}/photo`)),
-      getDownloadURL(sRef(storage, `games/on60/${playerId}/voice`)),
+      getDownloadURL(sRef(storage, `games/${data.code}/${playerId}/photo`)),
+      getDownloadURL(sRef(storage, `games/${data.code}/${playerId}/voice`)),
     ]);
     playerData.faceTextureURL = faceTextureURL;
     playerData.voiceClipURL = voiceClipURL;
 
-    const playerRef = ref(db, `games/on60/${playerId}`);
+    const playerRef = ref(db, `games/${data.code}/${playerId}`);
     set(playerRef, playerData);
-    console.log(playerData);
-    console.log(JSON.stringify(playerData))
+    set(ref(db, `games/${data.code}/joined`), playerData);
   };
 
   const handleSendData = useCallback(

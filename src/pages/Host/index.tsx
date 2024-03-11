@@ -2,7 +2,7 @@ import QRCodeStyling from "qr-code-styling-2";
 import { useEffect } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { db } from "../../firebase";
-import { getDatabase, ref, set } from "firebase/database";
+import { onValue, ref, set } from "firebase/database";
 
 function makeid(length: number) {
   let result = "";
@@ -58,6 +58,11 @@ export default function Host() {
 
     set(ref(db, "games/" + code), {
       code: code
+    })
+
+    onValue(ref(db, `games/4935/joined`), (snapshot) => {
+      console.log(snapshot.val())
+      sendMessage("Player Spawners", "SpawnPlayer", JSON.stringify(snapshot.val()))
     })
 
   };

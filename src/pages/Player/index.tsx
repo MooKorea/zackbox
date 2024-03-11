@@ -15,6 +15,12 @@ export default function Player() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const code = urlParams.get("code");
+
+    const pinInputs = document.querySelectorAll(".pin-input");
+    for (let i = 0; i < pinInputs?.length; i++) {
+      pinInputs[i].setAttribute("autocapitalize", "off")
+    }
+
     if (code === null) return;
     setCodeInput(code.split(""));
     nameInputRef.current.focus();
@@ -48,11 +54,12 @@ export default function Player() {
           onChange={(value, index, values) => setCodeInput(values.map(e => e === " " ? "" : e))}
           autoFocus
           type="text"
-          inputClassName="font-nunito font-bold text-white"
+          inputClassName="font-nunito font-bold text-white pin-input"
           placeholder=""
           borderColor="rgb(90, 90, 90)"
           focusBorderColor="rgb(83, 69, 245)"
           validBorderColor="rgb(83, 69, 245)"
+          autoComplete="off"
         />
         <input
           ref={nameInputRef}
