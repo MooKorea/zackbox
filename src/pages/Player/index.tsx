@@ -36,6 +36,7 @@ export default function Player() {
     console.log("made it here1");
     const checkRef = ref(db, `games/${codeInput.join("")}`);
     onValue(checkRef, (snapshot) => {
+      console.log(snapshot.val())
       if (snapshot.val() === null) {
         setIsInvalidCode(true);
       } else {
