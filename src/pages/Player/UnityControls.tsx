@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import RecordVoice from "./RecordVoice";
 import { useAppContext } from "../../Contexts";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ReactUnityEventParameter } from "react-unity-webgl/distribution/types/react-unity-event-parameters";
 import { db } from "../../firebase";
 import { ref, set, onDisconnect } from "firebase/database";
@@ -11,7 +11,7 @@ import { ref as sRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function UnityControls() {
   const [voiceSubmitted, setVoiceSubmitted] = useState(false);
-  
+
   return (
     <>
       {!voiceSubmitted && <RecordVoice setVoiceSubmitted={setVoiceSubmitted} />}
@@ -64,11 +64,6 @@ function UnityPlayer({ ...props }: UnityPlayer) {
         set(ref(db, `games/${data.code}/left`), { id: playerId });
       });
   }, []);
-
-  const location = useLocation();
-  useEffect(() => {
-    console.log("run")
-  }, [location]);
 
   const getFileURLs = async (playerData: PlayerData) => {
     if (data.photoBlob !== null && data.voiceBlob !== null) {
