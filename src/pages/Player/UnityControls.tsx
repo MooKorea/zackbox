@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import RecordVoice from "./RecordVoice";
 import { useAppContext } from "../../Contexts";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ReactUnityEventParameter } from "react-unity-webgl/distribution/types/react-unity-event-parameters";
 import { db } from "../../firebase";
-import { ref, set, remove } from "firebase/database";
+import { ref, set, remove, onDisconnect } from "firebase/database";
 import { storage } from "../../firebase";
 import { ref as sRef, uploadBytes } from "firebase/storage";
 
 export default function UnityControls() {
   const [voiceSubmitted, setVoiceSubmitted] = useState(false);
-
+  
   return (
     <>
       {!voiceSubmitted && <RecordVoice setVoiceSubmitted={setVoiceSubmitted} />}
@@ -32,35 +32,32 @@ function UnityPlayer({ ...props }: UnityPlayer) {
   const data = useAppContext();
   const navigate = useNavigate();
   const [playerId, setPlayerId] = useState(0);
-  const handleRemoveData = () => {
-    const playerRef = ref(db, `games/on60/${playerId}`);
-    remove(playerRef);
-  };
 
   useEffect(() => {
+    const playerId = Date.now();
+    setPlayerId(playerId);
     if (data.code === "") {
       navigate("/");
     }
-
-    window.addEventListener("unload", handleRemoveData);
-    return () => {
-      window.removeEventListener("unload", handleRemoveData);
-      handleRemoveData();
-    };
+    const playerRef = ref(db, `games/on60/${playerId}`);
+    onDisconnect(playerRef).remove();
   }, []);
+
+  const location = useLocation();
+  useEffect(() => {
+    console.log("run")
+  }, [location]);
 
   const handleSendData = useCallback(
     (...parameters: ReactUnityEventParameter[]) => {
-      const playerId = Date.now();
-      setPlayerId(playerId);
       if (data.photoBlob !== null) {
         uploadBytes(
           sRef(storage, `games/on60/${playerId}/photo`),
           data.photoBlob
         );
       }
-      
-      console.log(data.voiceBlob)
+
+      console.log(data.voiceBlob);
       if (data.voiceBlob !== null) {
         uploadBytes(
           sRef(storage, `games/on60/${playerId}/voice`),

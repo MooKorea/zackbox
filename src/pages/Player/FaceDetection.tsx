@@ -81,6 +81,7 @@ export default function FaceDetection() {
           ref={videoRef}
           className="brightness-[0.2] rounded-lg"
           style={{ transform: "rotateY(180deg)" }}
+          playsInline
         ></video>
         <canvas
           ref={canvasRef}
