@@ -5,9 +5,9 @@ import { useAppContext } from "../../Contexts";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ReactUnityEventParameter } from "react-unity-webgl/distribution/types/react-unity-event-parameters";
 import { db } from "../../firebase";
-import { ref, set, remove, onDisconnect } from "firebase/database";
+import { ref, set, onDisconnect } from "firebase/database";
 import { storage } from "../../firebase";
-import { ref as sRef, uploadBytes } from "firebase/storage";
+import { ref as sRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function UnityControls() {
   const [voiceSubmitted, setVoiceSubmitted] = useState(false);
@@ -15,10 +15,26 @@ export default function UnityControls() {
   return (
     <>
       {!voiceSubmitted && <RecordVoice setVoiceSubmitted={setVoiceSubmitted} />}
-      <UnityPlayer className={voiceSubmitted ? "block" : "hidden"} />
+      <UnityPlayer
+        className={`flex items-center justify-center ${
+          voiceSubmitted ? "block" : "hidden"
+        }`}
+      />
     </>
   );
 }
+
+type PlayerData = {
+  id: number;
+  hairIndex: number;
+  hairCol: string;
+  shirtCol: string;
+  pantsCol: string;
+  skinColor: string;
+  name: string;
+  faceTextureURL: string;
+  voiceClipURL: string;
+};
 
 type UnityPlayer = React.HTMLAttributes<HTMLDivElement>;
 
@@ -36,11 +52,17 @@ function UnityPlayer({ ...props }: UnityPlayer) {
   useEffect(() => {
     const playerId = Date.now();
     setPlayerId(playerId);
+
     if (data.code === "") {
       navigate("/");
     }
-    const playerRef = ref(db, `games/on60/${playerId}`);
-    onDisconnect(playerRef).remove();
+
+    const playerRef = ref(db, `games/${data.code}/${playerId}`);
+    onDisconnect(playerRef)
+      .remove()
+      .then(() => {
+        set(ref(db, `games/${data.code}/left`), { id: playerId });
+      });
   }, []);
 
   const location = useLocation();
@@ -48,33 +70,46 @@ function UnityPlayer({ ...props }: UnityPlayer) {
     console.log("run")
   }, [location]);
 
+  const getFileURLs = async (playerData: PlayerData) => {
+    if (data.photoBlob !== null && data.voiceBlob !== null) {
+      await Promise.all([
+        uploadBytes(
+          sRef(storage, `games/${data.code}/${playerId}/photo`),
+          data.photoBlob
+        ),
+        uploadBytes(
+          sRef(storage, `games/${data.code}/${playerId}/voice`),
+          data.voiceBlob
+        ),
+      ]);
+    }
+    const [faceTextureURL, voiceClipURL] = await Promise.all([
+      getDownloadURL(sRef(storage, `games/${data.code}/${playerId}/photo`)),
+      getDownloadURL(sRef(storage, `games/${data.code}/${playerId}/voice`)),
+    ]);
+    playerData.faceTextureURL = faceTextureURL;
+    playerData.voiceClipURL = voiceClipURL;
+
+    const playerRef = ref(db, `games/${data.code}/${playerId}`);
+    set(playerRef, playerData);
+    set(ref(db, `games/${data.code}/joined`), playerData);
+  };
+
   const handleSendData = useCallback(
     (...parameters: ReactUnityEventParameter[]) => {
-      if (data.photoBlob !== null) {
-        uploadBytes(
-          sRef(storage, `games/on60/${playerId}/photo`),
-          data.photoBlob
-        );
-      }
-
-      console.log(data.voiceBlob);
-      if (data.voiceBlob !== null) {
-        uploadBytes(
-          sRef(storage, `games/on60/${playerId}/voice`),
-          data.voiceBlob
-        );
-      }
-
-      const playerRef = ref(db, `games/on60/${playerId}`);
-      set(playerRef, {
+      const playerData: PlayerData = {
         id: playerId,
-        name: parameters[0],
-        hairIndex: parameters[1],
-        hairCol: parameters[2],
-        shirtCol: parameters[3],
-        pantsCol: parameters[4],
+        hairIndex: parameters[0] as number,
+        hairCol: parameters[1] as string,
+        shirtCol: parameters[2] as string,
+        pantsCol: parameters[3] as string,
         skinColor: data.skinColor,
-      });
+        name: data.name,
+        faceTextureURL: "",
+        voiceClipURL: "",
+      };
+
+      getFileURLs(playerData);
     },
     [data.voiceBlob]
   );
@@ -104,6 +139,16 @@ function UnityPlayer({ ...props }: UnityPlayer) {
 
   return (
     <div className={props.className}>
+      <div
+        className="absolute top-[50%] w-[12rem] h-2 z-10"
+        style={{ display: game.isLoaded ? "none" : "block" }}
+      >
+        <div className="absolute w-full h-full bg-gray-600"></div>
+        <div
+          className="absolute h-full bg-primary"
+          style={{ width: `${game.loadingProgression * 100}%` }}
+        ></div>
+      </div>
       <Unity
         unityProvider={game.unityProvider}
         className="w-full h-full absolute top-0"

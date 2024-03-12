@@ -29,3 +29,23 @@ input {
     outline: none;
     color: black;
 }
+
+.code-input {
+    background: none;
+    height: 3rem;
+    z-index: 2;
+    color: #ffffff;
+    letter-spacing: 2.55rem;
+    overflow: hidden;
+    width: 14rem;
+    position: relative;
+    left: 2.2rem;
+}
+
+.code-character {
+    height: 100%;
+    width: 2rem;
+    border: 1px solid rgb(77, 76, 76);
+    border-radius: 0.5rem;
+    background-color: #2c2a2e;
+}
