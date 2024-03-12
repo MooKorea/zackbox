@@ -33,28 +33,26 @@ export default function Player() {
     event.preventDefault();
 
     if (codeInput.join("").length !== 4) return;
-    console.log("made it here1");
     const checkRef = ref(db, `games/${codeInput.join("")}`);
-    onValue(checkRef, (snapshot) => {
-      console.log(snapshot.val())
-      if (snapshot.val() === null) {
-        setIsInvalidCode(true);
-      } else {
-        console.log("made it here2");
-        setCode(snapshot.val().code);
-        setName(nameInput);
-        navigate("/photo");
-      }
-    });
-    // const snapshot = await get(checkRef);
-    // if (snapshot.val() === null) {
-    //   setIsInvalidCode(true);
-    // } else {
-    //   console.log("made it here2");
-    //   setCode(snapshot.val().code);
-    //   setName(nameInput);
-    //   navigate("/photo");
-    // }
+    // onValue(checkRef, (snapshot) => {
+    //   console.log(snapshot.val())
+    //   if (snapshot.val() === null) {
+    //     setIsInvalidCode(true);
+    //   } else {
+    //     console.log("made it here2");
+    //     setCode(snapshot.val().code);
+    //     setName(nameInput);
+    //     navigate("/photo");
+    //   }
+    // });
+    const snapshot = await get(checkRef);
+    if (snapshot.val() === null) {
+      setIsInvalidCode(true);
+    } else {
+      setCode(snapshot.val().code);
+      setName(nameInput);
+      navigate("/photo");
+    }
   };
 
   return (
