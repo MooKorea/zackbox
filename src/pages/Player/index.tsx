@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../firebase";
-import { get, ref } from "firebase/database";
+import { get, ref, onValue } from "firebase/database";
 import { useAppContext } from "../../Contexts";
 import { PinInput } from "react-input-pin-code";
 
@@ -19,7 +19,7 @@ export default function Player() {
 
     const pinInputs = document.querySelectorAll(".pin-input");
     for (let i = 0; i < pinInputs?.length; i++) {
-      pinInputs[i].setAttribute("autocapitalize", "off")
+      pinInputs[i].setAttribute("autocapitalize", "off");
     }
 
     if (code === null) return;
@@ -32,27 +32,45 @@ export default function Player() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (codeInput.join('').length !== 4) return;
+    if (codeInput.join("").length !== 4) return;
     console.log("made it here1");
-    const checkRef = ref(db, `games/${codeInput.join('')}`);
-    const snapshot = await get(checkRef);
-    if (snapshot.val() === null) {
-      setIsInvalidCode(true);
-    } else {
-      console.log("made it here2");
-      setCode(snapshot.val().code);
-      setName(nameInput);
-      navigate("/photo");
-    }
+    const checkRef = ref(db, `games/${codeInput.join("")}`);
+    onValue(checkRef, (snapshot) => {
+      if (snapshot.val() === null) {
+        setIsInvalidCode(true);
+      } else {
+        console.log("made it here2");
+        setCode(snapshot.val().code);
+        setName(nameInput);
+        navigate("/photo");
+      }
+    });
+    // const snapshot = await get(checkRef);
+    // if (snapshot.val() === null) {
+    //   setIsInvalidCode(true);
+    // } else {
+    //   console.log("made it here2");
+    //   setCode(snapshot.val().code);
+    //   setName(nameInput);
+    //   navigate("/photo");
+    // }
   };
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center">
       <h1>ZACKBOX!</h1>
-      <div className={`bottom-[-2.5rem] mb-4 ${isInvalidCode ? "text-red-400" : "text-gray-400"}`}>{isInvalidCode ? "Invalid Code!" : "Enter Code"}</div>
+      <div
+        className={`bottom-[-2.5rem] mb-4 ${
+          isInvalidCode ? "text-red-400" : "text-gray-400"
+        }`}
+      >
+        {isInvalidCode ? "Invalid Code!" : "Enter Code"}
+      </div>
       <PinInput
         values={codeInput}
-        onChange={(value, index, values) => setCodeInput(values.map(e => e === " " ? "" : e))}
+        onChange={(value, index, values) =>
+          setCodeInput(values.map((e) => (e === " " ? "" : e)))
+        }
         autoFocus
         type="text"
         inputClassName="font-nunito font-bold text-white pin-input"
@@ -62,7 +80,10 @@ export default function Player() {
         validBorderColor="rgb(83, 69, 245)"
         autoComplete="off"
       />
-      <form className="relative flex flex-col items-center gap-4 mt-4" onSubmit={handleSubmit}>
+      <form
+        className="relative flex flex-col items-center gap-4 mt-4"
+        onSubmit={handleSubmit}
+      >
         <input
           ref={nameInputRef}
           type="text"
@@ -76,7 +97,7 @@ export default function Player() {
           type="submit"
           value="GO!"
           className={`text-white cursor-pointer rounded-lg transition-all h-12 w-[8rem] font-extrabold tracking-wide ${
-            codeInput.join('').length === 4 && nameInput.length > 0
+            codeInput.join("").length === 4 && nameInput.length > 0
               ? "bg-primary pointer-events-auto"
               : "bg-gray-600 text-gray-400 pointer-events-none"
           }`}
