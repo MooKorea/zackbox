@@ -33,12 +33,13 @@ export default function Player() {
     event.preventDefault();
 
     if (codeInput.join('').length !== 4) return;
-
+    console.log("made it here1");
     const checkRef = ref(db, `games/${codeInput.join('')}`);
     const snapshot = await get(checkRef);
     if (snapshot.val() === null) {
       setIsInvalidCode(true);
     } else {
+      console.log("made it here2");
       setCode(snapshot.val().code);
       setName(nameInput);
       navigate("/photo");
