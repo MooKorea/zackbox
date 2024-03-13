@@ -34,29 +34,37 @@ export default function Player() {
 
     if (codeInput.join("").length !== 4) return;
     const checkRef = ref(db, `games/${codeInput.join("")}`);
-    onValue(
-      checkRef,
-      (snapshot) => {
-        console.log(snapshot.val());
-        if (snapshot.val() === null) {
-          setIsInvalidCode(true);
-        } else {
-          console.log("made it here2");
-          setCode(snapshot.val().code);
-          setName(nameInput);
-          navigate("/photo");
-        }
-      },
-      { onlyOnce: true }
-    );
-    // const snapshot = await get(checkRef);
-    // if (snapshot.val() === null) {
-    //   setIsInvalidCode(true);
-    // } else {
-    //   setCode(snapshot.val().code);
-    //   setName(nameInput);
-    //   navigate("/photo");
-    // }
+    // onValue(
+    //   checkRef,
+    //   (snapshot) => {
+    //     //DOES NOT MAKE IT HERE
+    //     console.log(snapshot.val());
+    //     if (snapshot.val() === null) {
+    //       setIsInvalidCode(true);
+    //     } else {
+    //       console.log("made it here2");
+    //       setCode(snapshot.val().code);
+    //       setName(nameInput);
+    //       navigate("/photo");
+    //     }
+    //   },
+    //   { onlyOnce: true }
+    // );
+
+    //THIS ALSO DOES NOT WORK
+    //GETS STUCK ON AWAIT
+    try {
+      const snapshot = await get(checkRef);
+      if (snapshot.val() === null) {
+        setIsInvalidCode(true);
+      } else {
+        setCode(snapshot.val().code);
+        setName(nameInput);
+        navigate("/photo");
+      }
+    } catch (err) {
+      console.error(err)
+    }
   };
 
   return (
