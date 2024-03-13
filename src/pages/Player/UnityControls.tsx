@@ -66,28 +66,38 @@ function UnityPlayer({ ...props }: UnityPlayer) {
   }, []);
 
   const getFileURLs = async (playerData: PlayerData) => {
-    if (data.photoBlob !== null && data.voiceBlob !== null) {
+    const validBlobs = data.photoBlob !== null && data.voiceBlob !== null;
+    if (!validBlobs) {
+      console.error("blobs cannot be null");
+      return;
+    }
+    try {
       await Promise.all([
         uploadBytes(
           sRef(storage, `games/${data.code}/${playerId}/photo`),
-          data.photoBlob
+          data.photoBlob as Blob
         ),
         uploadBytes(
           sRef(storage, `games/${data.code}/${playerId}/voice`),
-          data.voiceBlob
+          data.voiceBlob as Blob
         ),
       ]);
-    }
-    const [faceTextureURL, voiceClipURL] = await Promise.all([
-      getDownloadURL(sRef(storage, `games/${data.code}/${playerId}/photo`)),
-      getDownloadURL(sRef(storage, `games/${data.code}/${playerId}/voice`)),
-    ]);
-    playerData.faceTextureURL = faceTextureURL;
-    playerData.voiceClipURL = voiceClipURL;
 
-    const playerRef = ref(db, `games/${data.code}/${playerId}`);
-    set(playerRef, playerData);
-    set(ref(db, `games/${data.code}/joined`), playerData);
+      const [faceTextureURL, voiceClipURL] = await Promise.all([
+        getDownloadURL(sRef(storage, `games/${data.code}/${playerId}/photo`)),
+        getDownloadURL(sRef(storage, `games/${data.code}/${playerId}/voice`)),
+      ]);
+      playerData.faceTextureURL = faceTextureURL;
+      playerData.voiceClipURL = voiceClipURL;
+
+      const playerRef = ref(db, `games/${data.code}/${playerId}`);
+      set(playerRef, playerData);
+      set(ref(db, `games/${data.code}/joined`), playerData);
+      game.sendMessage("Canvas", "JoinGameSuccess")
+    } catch (err) {
+      console.error(err);
+      game.sendMessage("Canvas", "JoinGameError")
+    }
   };
 
   const handleSendData = useCallback(
@@ -138,7 +148,7 @@ function UnityPlayer({ ...props }: UnityPlayer) {
         className="absolute top-[50%] w-[12rem] h-2 z-10"
         style={{ display: game.isLoaded ? "none" : "block" }}
       >
-        <div className="absolute w-full h-full bg-gray-600"></div>
+        <div className="absolute w-full h-full bg-gray-300"></div>
         <div
           className="absolute h-full bg-primary"
           style={{ width: `${game.loadingProgression * 100}%` }}
